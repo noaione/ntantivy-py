@@ -1,13 +1,27 @@
 use ::tantivy as tv;
+use filters::{
+    alpha_num::AlphaNumericOnlyFilter,
+    ascii_fold::AsciiFoldingFilter,
+    lowercaser::LowerCaserFilter,
+    remove_long::RemoveLongFilter,
+    split_compound::SplitCompoundWordsFilter,
+    stemmer::{Stemmer, StemmerFilter},
+    stop_words::StopWordsFilter,
+};
 use pyo3::{exceptions, prelude::*};
+use tokenizer::{
+    RawTokenizer, StandardTokenizer, FacetTokenizer, WhitespaceTokenizer, NgramTokenizer,
+};
 
 mod document;
 mod facet;
+mod filters;
 mod index;
 mod query;
 mod schema;
 mod schemabuilder;
 mod searcher;
+mod tokenizer;
 
 use document::Document;
 use facet::Facet;
@@ -75,6 +89,21 @@ fn tantivy(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<Index>()?;
     m.add_class::<DocAddress>()?;
     m.add_class::<Facet>()?;
+    // Analyzer/Tokenizer
+    m.add_class::<RawTokenizer>()?;
+    m.add_class::<StandardTokenizer>()?;
+    m.add_class::<FacetTokenizer>()?;
+    m.add_class::<WhitespaceTokenizer>()?;
+    m.add_class::<NgramTokenizer>()?;
+    // Filters
+    m.add_class::<AlphaNumericOnlyFilter>()?;
+    m.add_class::<AsciiFoldingFilter>()?;
+    m.add_class::<LowerCaserFilter>()?;
+    m.add_class::<RemoveLongFilter>()?;
+    m.add_class::<SplitCompoundWordsFilter>()?;
+    m.add_class::<Stemmer>()?;
+    m.add_class::<StemmerFilter>()?;
+    m.add_class::<StopWordsFilter>()?;
     Ok(())
 }
 
