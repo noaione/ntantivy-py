@@ -25,15 +25,108 @@ SOFTWARE.
 # TODO: Add docstrings for all the classes and methods.
 
 from datetime import datetime
+from enum import IntEnum
 from typing import Any, Generic, Literal, Optional, TypeAlias, TypeVar
 
 # Private types, cannot be imported from tantivy itself.
+# TODO: Change this later with the Tokenizer below after it's implemented.
 _TokenizerType: TypeAlias = Literal["raw", "whitespace", "default", "en_stem"]
 _IndexOptions: TypeAlias = Literal["position", "basic", "freq"]
 _ReloadPolicyOptions: TypeAlias = Literal["oncommit", "manual"]
 _OpStamp: TypeAlias = int
 _Cardinality: TypeAlias = Literal["single", "multi"]
 _SchemaT = TypeVar("_SchemaT", bound=Schema)
+
+class _TokenFilter:
+    def __init__(self) -> None: ...
+    @property
+    def name(self) -> str: ...
+    def rebuild(self) -> None: ...
+    def __repr__(self) -> str: ...
+
+class AlphaNumericOnlyFilter(_TokenFilter):
+    ...
+    
+class AsciiFoldingFilter(_TokenFilter):
+    ...
+    
+class LowerCaserFilter(_TokenFilter):
+    ...
+    
+class RemoveLongFilter(_TokenFilter):
+    def __init__(self, length_limit: int = ...) -> None: ...
+    
+    @property
+    def length_limit(self) -> int: ...
+    @length_limit.setter
+    def length_limit(self, length_limit: int) -> None: ...
+    
+class SplitCompoundWordsFilter(_TokenFilter):
+    def __init__(self, compound_words: list[str]) -> None: ...
+    @property
+    def words(self) -> list[str]: ...
+    def add_word(self, word: str) -> None: ...
+    def remove_word(self, word: str) -> None: ...
+
+class LanguageFilter(IntEnum):
+    ARABIC = 0
+    Danish = 1
+    Dutch = 2
+    English = 3
+    Finnish = 4
+    French = 5
+    German = 6
+    Greek = 7
+    Hungarian = 8
+    Italian = 9
+    Norwegian = 10
+    Portuguese = 11
+    Romanian = 12
+    Russian = 13
+    Spanish = 14
+    Swedish = 15
+    Tamil = 16
+    Turkish = 17
+    
+class Stemmer:
+    def __init__(self, language: LanguageFilter) -> None: ...
+    @property
+    def name(self) -> str: ...
+    @property
+    def iso6391(self) -> str: ...
+    def __repr__(self) -> str: ...
+
+class StemmerFilter(_TokenFilter):
+    def __init__(self, stemmer: Stemmer) -> None: ...
+    @property
+    def stem_name(self) -> str: ...
+    @property
+    def stem_iso6391(self) -> str: ...
+    def set_stemmer(self, stemmer: Stemmer) -> None: ...
+
+class StopWordsFilter(_TokenFilter):
+    def __init__(self, language: LanguageFilter) -> None: ...
+    @property
+    def language(self) -> LanguageFilter: ...
+    def set_language(self, language: LanguageFilter) -> None: ...
+
+class _Tokenizer:
+    def add_filter(self, filter: _TokenFilter) -> None: ...
+
+class RawTokenizer(_Tokenizer):
+    def __init__(self) -> None: ...
+
+class StandardTokenizer(_Tokenizer):
+    def __init__(self) -> None: ...
+
+class WhitespaceTokenizer(_Tokenizer):
+    def __init__(self) -> None: ...
+
+class FacetTokenizer(_Tokenizer):
+    def __init__(self) -> None: ...
+
+class NgramTokenizer(_Tokenizer):
+    def __init__(self, min_gram: int, max_gram: int, prefix_only: bool) -> None: ...
 
 class Schema(Generic[_SchemaT]): ...
 

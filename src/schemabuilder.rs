@@ -120,7 +120,7 @@ impl SchemaBuilder {
     ) -> PyResult<Self> {
         let builder = &mut self.builder;
 
-        let opts = SchemaBuilder::build_int_option(stored, indexed, fast)?;
+        let opts = SchemaBuilder::build_numeric_option(stored, indexed, fast)?;
 
         if let Some(builder) = builder.write().unwrap().as_mut() {
             builder.add_i64_field(name, opts);
@@ -162,10 +162,136 @@ impl SchemaBuilder {
     ) -> PyResult<Self> {
         let builder = &mut self.builder;
 
-        let opts = SchemaBuilder::build_int_option(stored, indexed, fast)?;
+        let opts = SchemaBuilder::build_numeric_option(stored, indexed, fast)?;
 
         if let Some(builder) = builder.write().unwrap().as_mut() {
             builder.add_u64_field(name, opts);
+        } else {
+            return Err(exceptions::PyValueError::new_err(
+                "Schema builder object isn't valid anymore.",
+            ));
+        }
+        Ok(self.clone())
+    }
+
+    /// Add a new float field to the schema.
+    ///
+    /// Args:
+    ///     name (str): The name of the field.
+    ///     stored (bool, optional): If true sets the field as stored, the
+    ///         content of the field can be later restored from a Searcher.
+    ///         Defaults to False.
+    ///     indexed (bool, optional): If true sets the field to be indexed.
+    ///     fast (str, optional): Set the u64 options as a single-valued fast
+    ///         field. Fast fields are designed for random access. Access time
+    ///         are similar to a random lookup in an array. If more than one
+    ///         value is associated to a fast field, only the last one is kept.
+    ///         Can be one of 'single' or 'multi'. If this is set to 'single,
+    ///         the document must have exactly one value associated to the
+    ///         document. If this is set to 'multi', the document can have any
+    ///         number of values associated to the document. Defaults to None,
+    ///         which disables this option.
+    ///
+    /// Returns the associated field handle.
+    /// Raises a ValueError if there was an error with the field creation.
+    #[pyo3(signature = (name, stored = false, indexed = false, fast = None))]
+    fn add_float_field(
+        &mut self,
+        name: &str,
+        stored: bool,
+        indexed: bool,
+        fast: Option<&str>,
+    ) -> PyResult<Self> {
+        let builder = &mut self.builder;
+
+        let opts = SchemaBuilder::build_numeric_option(stored, indexed, fast)?;
+
+        if let Some(builder) = builder.write().unwrap().as_mut() {
+            builder.add_f64_field(name, opts);
+        } else {
+            return Err(exceptions::PyValueError::new_err(
+                "Schema builder object isn't valid anymore.",
+            ));
+        }
+        Ok(self.clone())
+    }
+
+    /// Add a new IP address field to the schema.
+    ///
+    /// Args:
+    ///     name (str): The name of the field.
+    ///     stored (bool, optional): If true sets the field as stored, the
+    ///         content of the field can be later restored from a Searcher.
+    ///         Defaults to False.
+    ///     indexed (bool, optional): If true sets the field to be indexed.
+    ///     fast (str, optional): Set the u64 options as a single-valued fast
+    ///         field. Fast fields are designed for random access. Access time
+    ///         are similar to a random lookup in an array. If more than one
+    ///         value is associated to a fast field, only the last one is kept.
+    ///         Can be one of 'single' or 'multi'. If this is set to 'single,
+    ///         the document must have exactly one value associated to the
+    ///         document. If this is set to 'multi', the document can have any
+    ///         number of values associated to the document. Defaults to None,
+    ///         which disables this option.
+    ///
+    /// Returns the associated field handle.
+    /// Raises a ValueError if there was an error with the field creation.
+    #[pyo3(signature = (name, stored = false, indexed = false, fast = None))]
+    fn add_ip_address_field(
+        &mut self,
+        name: &str,
+        stored: bool,
+        indexed: bool,
+        fast: Option<&str>,
+    ) -> PyResult<Self> {
+        let builder = &mut self.builder;
+
+        let opts = SchemaBuilder::build_ip_addr_option(stored, indexed, fast)?;
+
+        if let Some(builder) = builder.write().unwrap().as_mut() {
+            builder.add_ip_addr_field(name, opts);
+        } else {
+            return Err(exceptions::PyValueError::new_err(
+                "Schema builder object isn't valid anymore.",
+            ));
+        }
+        Ok(self.clone())
+    }
+
+    /// Add a new boolean field to the schema.
+    ///
+    /// Args:
+    ///     name (str): The name of the field.
+    ///     stored (bool, optional): If true sets the field as stored, the
+    ///         content of the field can be later restored from a Searcher.
+    ///         Defaults to False.
+    ///     indexed (bool, optional): If true sets the field to be indexed.
+    ///     fast (str, optional): Set the u64 options as a single-valued fast
+    ///         field. Fast fields are designed for random access. Access time
+    ///         are similar to a random lookup in an array. If more than one
+    ///         value is associated to a fast field, only the last one is kept.
+    ///         Can be one of 'single' or 'multi'. If this is set to 'single,
+    ///         the document must have exactly one value associated to the
+    ///         document. If this is set to 'multi', the document can have any
+    ///         number of values associated to the document. Defaults to None,
+    ///         which disables this option.
+    ///
+    /// Returns the associated field handle.
+    /// Raises a ValueError if there was an error with the field creation.
+    #[pyo3(signature = (name, stored = false, indexed = false, fast = None))]
+    fn add_bool_field(
+        &mut self,
+        name: &str,
+        stored: bool,
+        indexed: bool,
+        fast: Option<&str>,
+    ) -> PyResult<Self> {
+        let builder = &mut self.builder;
+
+        let opts = SchemaBuilder::build_numeric_option(stored, indexed, fast)?;
+
+        if let Some(builder) = builder.write().unwrap().as_mut() {
+            builder.add_bool_field(name, opts);
         } else {
             return Err(exceptions::PyValueError::new_err(
                 "Schema builder object isn't valid anymore.",
@@ -343,12 +469,45 @@ impl SchemaBuilder {
 }
 
 impl SchemaBuilder {
-    fn build_int_option(
+    fn build_numeric_option(
         stored: bool,
         indexed: bool,
         fast: Option<&str>,
     ) -> PyResult<schema::NumericOptions> {
         let opts = schema::NumericOptions::default();
+
+        let opts = if stored { opts.set_stored() } else { opts };
+        let opts = if indexed { opts.set_indexed() } else { opts };
+
+        let fast = match fast {
+            Some(f) => {
+                let f = f.to_lowercase();
+                match f.as_ref() {
+                    "single" => Some(schema::Cardinality::SingleValue),
+                    "multi" => Some(schema::Cardinality::MultiValues),
+                    _ => return Err(exceptions::PyValueError::new_err(
+                        "Invalid index option, valid choices are: 'multivalue' and 'singlevalue'"
+                    )),
+                }
+            }
+            None => None,
+        };
+
+        let opts = if let Some(f) = fast {
+            opts.set_fast(f)
+        } else {
+            opts
+        };
+
+        Ok(opts)
+    }
+
+    fn build_ip_addr_option(
+        stored: bool,
+        indexed: bool,
+        fast: Option<&str>,
+    ) -> PyResult<schema::IpAddrOptions> {
+        let opts = schema::IpAddrOptions::default();
 
         let opts = if stored { opts.set_stored() } else { opts };
         let opts = if indexed { opts.set_indexed() } else { opts };
