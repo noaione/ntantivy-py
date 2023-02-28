@@ -2,6 +2,7 @@ use ::tantivy as tv;
 use filters::{
     alpha_num::AlphaNumericOnlyFilter,
     ascii_fold::AsciiFoldingFilter,
+    language::LanguageFilter,
     lowercaser::LowerCaserFilter,
     remove_long::RemoveLongFilter,
     split_compound::SplitCompoundWordsFilter,
@@ -10,7 +11,8 @@ use filters::{
 };
 use pyo3::{exceptions, prelude::*};
 use tokenizer::{
-    RawTokenizer, StandardTokenizer, FacetTokenizer, WhitespaceTokenizer, NgramTokenizer,
+    FacetTokenizer, NgramTokenizer, RawTokenizer, StandardTokenizer,
+    WhitespaceTokenizer,
 };
 
 mod document;
@@ -96,6 +98,7 @@ fn tantivy(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<WhitespaceTokenizer>()?;
     m.add_class::<NgramTokenizer>()?;
     // Filters
+    m.add_class::<LanguageFilter>()?;
     m.add_class::<AlphaNumericOnlyFilter>()?;
     m.add_class::<AsciiFoldingFilter>()?;
     m.add_class::<LowerCaserFilter>()?;

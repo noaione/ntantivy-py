@@ -2,11 +2,12 @@
 
 use pyo3::prelude::*;
 use tantivy::tokenizer::{
-    FacetTokenizer as TFacetTok, NgramTokenizer as TNGramTok, RawTokenizer as TRawTok, SimpleTokenizer as TSimpleTok,
-    TextAnalyzer, WhitespaceTokenizer as TWhitespaceTok, LowerCaser,
+    FacetTokenizer as TFacetTok, LowerCaser, NgramTokenizer as TNGramTok,
+    RawTokenizer as TRawTok, SimpleTokenizer as TSimpleTok, TextAnalyzer,
+    WhitespaceTokenizer as TWhitespaceTok,
 };
 
-use crate::{filters::{self, remove_long::RemoveLongFilter}};
+use crate::filters::{self, remove_long::RemoveLongFilter};
 
 #[pyclass(subclass)]
 #[derive(Default)]
@@ -92,8 +93,9 @@ impl Default for StandardTokenizer {
             analyzer: TextAnalyzer::from(TSimpleTok),
         };
         let r_long = RemoveLongFilter::new(40).0;
-        
-        tokenizer.analyzer = tokenizer.analyzer
+
+        tokenizer.analyzer = tokenizer
+            .analyzer
             .filter(r_long.inner.clone())
             .filter(LowerCaser);
         tokenizer
